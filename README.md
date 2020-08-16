@@ -8,6 +8,12 @@ cargo build
 # 実行.
 cargo run
 
-# 削除.
+# ビルドファイルの削除.
 cargo clean
+
+# エラーチェック.
+cargo check
+
+# テスト.
+cargo test
 ```
