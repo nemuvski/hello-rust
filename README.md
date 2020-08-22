@@ -16,4 +16,8 @@ cargo check
 
 # テスト.
 cargo test
+
+# ドキュメント.
+cargo doc
+cargo doc --open
 ```
