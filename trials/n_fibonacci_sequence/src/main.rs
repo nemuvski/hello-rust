@@ -17,9 +17,10 @@ fn main() {
 
 fn fibonacci_sequence(n: u32) -> u32 {
   if n == 0 {
-    return 0
+    0
   } else if n == 1 {
-    return 1
+    1
+  } else {
+    fibonacci_sequence(n - 2) + fibonacci_sequence(n - 1)
   }
-  fibonacci_sequence(n - 2) + fibonacci_sequence(n - 1)
 }
