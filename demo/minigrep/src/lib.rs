@@ -27,7 +27,35 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
   let mut f = File::open(&config.path_to_file)?;
   let mut contents = String::new();
   f.read_to_string(&mut contents)?;
-  println!("With text:\n{}", contents);
 
   Ok(())
+}
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+  let mut results = Vec::new();
+  for line in contents.lines() {
+    if line.contains(query) {
+      results.push(line);
+    }
+  }
+  results
+}
+
+// Note: testコマンドを実行した時のみコンパイルされる.
+#[cfg(test)]
+mod test {
+  use super::*;
+
+  #[test]
+  fn test_one_result() {
+    let query = "duct";
+    let contents = "Rust:\n\
+      safe, fast, productive.\n\
+      Pick three.";
+
+    assert_eq!(
+      vec!["safe, fast, productive."],
+      search(query, contents)
+    );
+  }
 }
