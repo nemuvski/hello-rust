@@ -1,4 +1,5 @@
 use std::env;
+use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::process;
@@ -11,12 +12,20 @@ fn main() {
     process::exit(1);
   });
 
-  let mut f = File::open(&config.path_to_file).expect("file not found");
-  let mut contents = String::new();
-  f.read_to_string(&mut contents)
-    .expect("something went wrong reading the file");
+  // Note: runがErr値を返したかどうかだけ気にすれば良いので,if-letで記述している.(成功時は()でしかないため)
+  if let Err(err) = run(config) {
+    println!("Application error: {}", err);
+    process::exit(1);
+  }
+}
 
+fn run(config: Config) -> Result<(), Box<Error>> {
+  let mut f = File::open(&config.path_to_file)?;
+  let mut contents = String::new();
+  f.read_to_string(&mut contents)?;
   println!("With text:\n{}", contents);
+
+  Ok(())
 }
 
 struct Config {
@@ -27,8 +36,7 @@ struct Config {
 impl Config {
   fn new(args: &[String]) -> Result<Config, &'static str> {
     if args.len() != 3 {
-      return Err("
-        Invalid argument!!!\n\
+      return Err("Invalid argument!!!\n\
         Arguments:\n\
         \t1st: Search string\n\
         \t2nd: Path to a File
