@@ -1,12 +1,20 @@
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
+use std::process;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
-  let (query, path_to_file) = parse_arguments(&args);
+  // Note: unwrap_or_elseで,panic!ではなく独自のエラー処理を定義できる.
+  let config = Config::new(&args).unwrap_or_else(|err| {
+    println!("{}", err);
+    println!("Arguments:");
+    println!("\t1st: Search string");
+    println!("\t2nd: Path to a File");
+    process::exit(1);
+  });
 
-  let mut f = File::open(path_to_file).expect("file not found");
+  let mut f = File::open(&config.path_to_file).expect("file not found");
   let mut contents = String::new();
   f.read_to_string(&mut contents)
     .expect("something went wrong reading the file");
@@ -14,13 +22,19 @@ fn main() {
   println!("With text:\n{}", contents);
 }
 
-fn parse_arguments(args: &Vec<String>) -> (&String, &String) {
-  if args.len() != 3 {
-    println!("Arguments:");
-    println!("\t1st: Search string");
-    println!("\t2nd: Path to File");
-    panic!()
-  } else {
-    (&args[1], &args[2])
+struct Config {
+  query: String,
+  path_to_file: String,
+}
+
+impl Config {
+  fn new(args: &[String]) -> Result<Config, &'static str> {
+    if args.len() != 3 {
+      return Err("Invalid argument!!!");
+    }
+    Ok(Config {
+      query: args[1].clone(),
+      path_to_file: args[2].clone(),
+    })
   }
 }
