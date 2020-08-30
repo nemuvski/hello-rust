@@ -18,6 +18,17 @@ fn largest_char(list: &[char]) -> char {
   largest
 }
 
+// スライスの値の型がPartialOrdとCopyを実装する.
+fn largest<T: PartialOrd + Copy>(list: &[T]) -> T {
+  let mut largest = list[0];
+  for &item in list.iter() {
+    if item > largest {
+      largest = item;
+    }
+  }
+  largest
+}
+
 #[derive(Debug)]
 struct Point<T> {
   x: T,
@@ -62,4 +73,7 @@ fn main() {
   println!("The distance from {:?} to {:?} is {}",
     point1, point2, Point::distance(&point1, &point2)
   );
+
+  let result = largest(&number_list);
+  println!("{}", result);
 }
