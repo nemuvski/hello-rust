@@ -8,9 +8,6 @@ fn main() {
   // Note: unwrap_or_elseで,panic!ではなく独自のエラー処理を定義できる.
   let config = Config::new(&args).unwrap_or_else(|err| {
     println!("{}", err);
-    println!("Arguments:");
-    println!("\t1st: Search string");
-    println!("\t2nd: Path to a File");
     process::exit(1);
   });
 
@@ -30,7 +27,12 @@ struct Config {
 impl Config {
   fn new(args: &[String]) -> Result<Config, &'static str> {
     if args.len() != 3 {
-      return Err("Invalid argument!!!");
+      return Err("
+        Invalid argument!!!\n\
+        Arguments:\n\
+        \t1st: Search string\n\
+        \t2nd: Path to a File
+      ");
     }
     Ok(Config {
       query: args[1].clone(),
