@@ -1,3 +1,4 @@
+use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -5,6 +6,7 @@ use std::io::prelude::*;
 pub struct Config {
   pub query: String,
   pub path_to_file: String,
+  pub case_sensitive: bool,
 }
 
 impl Config {
@@ -16,9 +18,11 @@ impl Config {
         \t2nd: Path to a File
       ");
     }
+    let case_sensitive = env::var("CASE_SENSITIVE").is_ok();
     Ok(Config {
       query: args[1].clone(),
       path_to_file: args[2].clone(),
+      case_sensitive,
     })
   }
 }
@@ -28,7 +32,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
   let mut contents = String::new();
   f.read_to_string(&mut contents)?;
 
-  for line in search(&config.query, &contents) {
+  let results = if config.case_sensitive {
+    search(&config.query, &contents)
+  } else {
+    search_insensitive(&config.query, &contents)
+  };
+
+  for line in results {
     println!("{}", line);
   }
 
@@ -39,6 +49,17 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
   let mut results = Vec::new();
   for line in contents.lines() {
     if line.contains(query) {
+      results.push(line);
+    }
+  }
+  results
+}
+
+pub fn search_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+  let mut results = Vec::new();
+  let query = query.to_lowercase();
+  for line in contents.lines() {
+    if line.to_lowercase().contains(&query) {
       results.push(line);
     }
   }
@@ -67,6 +88,31 @@ mod test {
   fn case_no_result() {
     let query = "ABCDEFG";
     let contents = "hoge hugo\ntest";
+    let results = search(query, contents);
+    assert_eq!(0, results.len());
+  }
+
+  #[test]
+  fn case_insensitive() {
+    let query = "rUsT";
+    let contents = "Rust:\n\
+      safe, fast, productive.\n\
+      Pick three.\n\
+      Trust me.";
+
+    assert_eq!(
+      vec!["Rust:", "Trust me."],
+      search_insensitive(query, contents)
+    );
+  }
+
+  #[test]
+  fn case_sensitive() {
+    let query = "rUsT";
+    let contents = "Rust:\n\
+      safe, fast, productive.\n\
+      Pick three.\n\
+      Trust me.";
     let results = search(query, contents);
     assert_eq!(0, results.len());
   }
