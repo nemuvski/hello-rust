@@ -51,7 +51,7 @@ mod test {
   use super::*;
 
   #[test]
-  fn test_one_result() {
+  fn case_one_result() {
     let query = "duct";
     let contents = "Rust:\n\
       safe, fast, productive.\n\
@@ -61,5 +61,13 @@ mod test {
       vec!["safe, fast, productive."],
       search(query, contents)
     );
+  }
+
+  #[test]
+  fn case_no_result() {
+    let query = "ABCDEFG";
+    let contents = "hoge hugo\ntest";
+    let results = search(query, contents);
+    assert_eq!(0, results.len());
   }
 }
