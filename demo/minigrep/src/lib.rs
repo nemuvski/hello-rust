@@ -1,4 +1,5 @@
 use std::env;
+use std::env::Args;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
@@ -10,7 +11,7 @@ pub struct Config {
 }
 
 impl Config {
-  pub fn new(args: &[String]) -> Result<Config, &'static str> {
+  pub fn new(mut args: Args) -> Result<Config, &'static str> {
     if args.len() != 3 {
       return Err("Invalid argument!!!\n\
         Arguments:\n\
@@ -18,10 +19,22 @@ impl Config {
         \t2nd: Path to a File
       ");
     }
+
+    // Note: 1番目の引数はプログラム名を指し,ここでは不要.
+    args.next();
+    let query = match args.next() {
+      Some(arg) => arg,
+      None => return Err("Did not get a query string"),
+    };
+    let path_to_file = match args.next() {
+      Some(arg) => arg,
+      None => return Err("Did not get a path to file")
+    };
     let case_sensitive = env::var("CASE_SENSITIVE").is_ok();
+
     Ok(Config {
-      query: args[1].clone(),
-      path_to_file: args[2].clone(),
+      query,
+      path_to_file,
       case_sensitive,
     })
   }
